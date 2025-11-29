@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 load_dotenv()
 
-# Compose DATABASE_URL from individual env vars if not set
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
     host = os.getenv('DB_HOST', 'localhost')

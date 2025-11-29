@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 Base = declarative_base()
 
 
-# 1.1 Author Model
+
 class Author(Base):
     __tablename__ = 'authors'
 
@@ -17,7 +17,6 @@ class Author(Base):
     books = relationship("Book", back_populates="author", cascade="all, delete-orphan")
 
 
-# 1.2 Book Model
 class Book(Base):
     __tablename__ = 'books'
 
@@ -34,7 +33,6 @@ class Book(Base):
     borrows = relationship("Borrow", back_populates="book", cascade="all, delete-orphan")
 
 
-# 1.3 Student Model
 class Student(Base):
     __tablename__ = 'students'
 
@@ -47,7 +45,7 @@ class Student(Base):
     borrows = relationship("Borrow", back_populates="student", cascade="all, delete-orphan")
 
 
-# 1.4 Borrow Model
+
 class Borrow(Base):
     __tablename__ = 'borrows'
 
