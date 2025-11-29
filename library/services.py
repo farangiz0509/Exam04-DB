@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timedelta
 
 # ==================== AUTHOR CRUD ====================
+# Muallif yaratish funksiyasi
 def create_author(name: str, bio: str = None) -> Author:
     with SessionLocal() as session:
         author = Author(name=name, bio=bio)
@@ -12,14 +13,17 @@ def create_author(name: str, bio: str = None) -> Author:
         session.refresh(author)
         return author
 
+# Muallifni ID bo'yicha olish
 def get_author_by_id(author_id: int) -> Author | None:
     with SessionLocal() as session:
         return session.get(Author, author_id)
 
+# Barcha mualliflarni olish
 def get_all_authors() -> list[Author]:
     with SessionLocal() as session:
         return session.query(Author).all()
 
+# Muallif ma'lumotlarini yangilash
 def update_author(author_id: int, name: str = None, bio: str = None) -> Author | None:
     with SessionLocal() as session:
         author = session.get(Author, author_id)
@@ -33,6 +37,7 @@ def update_author(author_id: int, name: str = None, bio: str = None) -> Author |
         session.refresh(author)
         return author
 
+# Muallifni o'chirish (kitoblari bo'lmasa)
 def delete_author(author_id: int) -> bool:
     with SessionLocal() as session:
         author = session.get(Author, author_id)
@@ -42,6 +47,7 @@ def delete_author(author_id: int) -> bool:
         return True
 
 # ==================== BOOK CRUD ====================
+# Kitob yaratish funksiyasi
 def create_book(title: str, author_id: int, published_year: int, isbn: str = None) -> Book:
     with SessionLocal() as session:
         book = Book(title=title, author_id=author_id, published_year=published_year, isbn=isbn)
@@ -54,18 +60,22 @@ def create_book(title: str, author_id: int, published_year: int, isbn: str = Non
         session.refresh(book)
         return book
 
+# Kitobni ID bo'yicha olish
 def get_book_by_id(book_id: int) -> Book | None:
     with SessionLocal() as session:
         return session.get(Book, book_id)
 
+# Barcha kitoblarni olish
 def get_all_books() -> list[Book]:
     with SessionLocal() as session:
         return session.query(Book).all()
 
+# Kitoblarni sarlavha bo'yicha qidirish
 def search_books_by_title(title: str) -> list[Book]:
     with SessionLocal() as session:
         return session.query(Book).filter(Book.title.ilike(f"%{title}%")).all()
 
+# Kitobni o'chirish
 def delete_book(book_id: int) -> bool:
     with SessionLocal() as session:
         book = session.get(Book, book_id)
@@ -75,6 +85,7 @@ def delete_book(book_id: int) -> bool:
         return True
 
 # ==================== STUDENT CRUD ====================
+# Talaba yaratish funksiyasi
 def create_student(full_name: str, email: str, grade: str = None) -> Student:
     with SessionLocal() as session:
         student = Student(full_name=full_name, email=email, grade=grade)
@@ -83,18 +94,21 @@ def create_student(full_name: str, email: str, grade: str = None) -> Student:
             session.commit()
         except IntegrityError:
             session.rollback()
-            raise ValueError("Email must be unique")
+            return None  # Email takrorlangan bo'lsa None qaytaradi
         session.refresh(student)
         return student
 
+# Talabani ID bo'yicha olish
 def get_student_by_id(student_id: int) -> Student | None:
     with SessionLocal() as session:
         return session.get(Student, student_id)
 
+# Barcha talabalarni olish
 def get_all_students() -> list[Student]:
     with SessionLocal() as session:
         return session.query(Student).all()
 
+# Talaba sinfini yangilash
 def update_student_grade(student_id: int, grade: str) -> Student | None:
     with SessionLocal() as session:
         student = session.get(Student, student_id)
@@ -106,6 +120,7 @@ def update_student_grade(student_id: int, grade: str) -> Student | None:
         return student
 
 # ==================== BORROW/RETURN ====================
+# Kitobni talabaga berish
 def borrow_book(student_id: int, book_id: int) -> Borrow | None:
     with SessionLocal() as session:
         student = session.get(Student, student_id)
@@ -127,6 +142,7 @@ def borrow_book(student_id: int, book_id: int) -> Borrow | None:
         session.refresh(borrow)
         return borrow
 
+# Kitobni qaytarish
 def return_book(borrow_id: int) -> bool:
     with SessionLocal() as session:
         borrow = session.get(Borrow, borrow_id)
@@ -138,19 +154,23 @@ def return_book(borrow_id: int) -> bool:
         return True
 
 # ==================== QUERY FUNCTIONS ====================
+# Talabaning jami olgan kitoblari soni
 def get_student_borrow_count(student_id: int) -> int:
     with SessionLocal() as session:
         return session.query(Borrow).filter(Borrow.student_id==student_id).count()
 
+# Hozirda band bo'lgan kitoblar va ularni olgan talabalar
 def get_currently_borrowed_books() -> list[tuple[Book, Student, datetime]]:
     with SessionLocal() as session:
         results = session.query(Borrow).filter(Borrow.returned_at==None).all()
         return [(b.book, b.student, b.borrowed_at) for b in results]
 
+# Muayyan muallifning barcha kitoblari
 def get_books_by_author(author_id: int) -> list[Book]:
     with SessionLocal() as session:
         return session.query(Book).filter(Book.author_id==author_id).all()
 
+# Kechikkan kitoblar ro'yxati
 def get_overdue_borrows() -> list[tuple[Borrow, Student, Book, int]]:
     with SessionLocal() as session:
         overdue = session.query(Borrow).filter(
